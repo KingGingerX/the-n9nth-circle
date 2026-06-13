@@ -1,0 +1,10 @@
+{
+  "project": "ninthcircle",
+  "webhook": {
+    "url": "",
+    "events": [
+      "checkout.session.completed"
+    ]
+  },
+  "products": []
+}

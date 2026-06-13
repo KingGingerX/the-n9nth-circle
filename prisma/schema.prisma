@@ -1,0 +1,341 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id               String    @id @default(cuid())
+  name             String?
+  email            String?   @unique
+  emailVerified    DateTime?
+  image            String?
+  role             String    @default("USER")
+  bio              String?
+  location         String?
+  isPremiumSeller  Boolean   @default(false)
+  premiumExpiresAt DateTime?
+  hasForumAccess   Boolean   @default(false)
+  forumAccessExpiresAt DateTime?
+  stripeCustomerId String?
+  totalSales       Float     @default(0)
+  totalEarnings    Float     @default(0)
+  sellerRating     Float     @default(0)
+  reviewCount      Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  accounts        Account[]
+  sessions        Session[]
+  listings        Listing[]
+  purchases       Purchase[]  @relation("BuyerPurchases")
+  sales           Purchase[]  @relation("SellerSales")
+  reviewsGiven    Review[]    @relation("ReviewsGiven")
+  reviewsReceived Review[]    @relation("ReviewsReceived")
+  forumPosts      ForumPost[]
+  forumReplies    ForumReply[]
+  offersMade      Offer[]     @relation("OffersMade")
+  watchlist        Watchlist[]
+  wantToBuys       WantToBuy[]
+  notifications    Notification[]
+  conversations1   Conversation[] @relation("ConvP1")
+  conversations2   Conversation[] @relation("ConvP2")
+  sentMessages     Message[]
+}
+
+model Listing {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  price           Float
+  gameSystem      String
+  faction         String
+  condition       String
+  pointsValue     Int?
+  images          String
+  status          String   @default("ACTIVE")
+  isBoosted       Boolean  @default(false)
+  boostExpiresAt  DateTime?
+  isFeaturedHome  Boolean  @default(false)
+  isHallOfLegends Boolean  @default(false)
+  hallOfLegendsStatus String @default("NONE")
+  allowOffers     Boolean  @default(true)
+  sellerId        String
+  views           Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  seller        User           @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  purchases     Purchase[]
+  offers        Offer[]
+  watchlist     Watchlist[]
+  conversations Conversation[]
+
+  @@index([status])
+  @@index([sellerId])
+  @@index([isBoosted])
+  @@index([isFeaturedHome])
+  @@index([gameSystem])
+}
+
+model Purchase {
+  id                    String   @id @default(cuid())
+  listingId             String
+  buyerId               String
+  sellerId              String
+  amount                Float
+  commission            Float
+  sellerPayout          Float
+  stripePaymentIntentId String?
+  status                String   @default("PENDING")
+  createdAt             DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id])
+  buyer   User    @relation("BuyerPurchases", fields: [buyerId], references: [id])
+  seller  User    @relation("SellerSales", fields: [sellerId], references: [id])
+
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int
+  comment     String?
+  purchaseId  String   @unique
+  reviewerId  String
+  revieweeId  String
+  createdAt   DateTime @default(now())
+
+  reviewer User @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  reviewee User @relation("ReviewsReceived", fields: [revieweeId], references: [id])
+}
+
+model ForumCategory {
+  id            String  @id @default(cuid())
+  name          String
+  slug          String  @unique
+  description   String
+  isPremiumOnly Boolean @default(false)
+  icon          String  @default("💬")
+  sortOrder     Int     @default(0)
+
+  posts ForumPost[]
+}
+
+model ForumPost {
+  id         String   @id @default(cuid())
+  title      String
+  content    String
+  categoryId String
+  authorId   String
+  isPinned   Boolean  @default(false)
+  isLocked   Boolean  @default(false)
+  views      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  category ForumCategory @relation(fields: [categoryId], references: [id])
+  author   User          @relation(fields: [authorId], references: [id])
+  replies  ForumReply[]
+
+  @@index([categoryId])
+  @@index([authorId])
+}
+
+model ForumReply {
+  id        String   @id @default(cuid())
+  content   String
+  postId    String
+  authorId  String
+  createdAt DateTime @default(now())
+
+  post   ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User      @relation(fields: [authorId], references: [id])
+}
+
+model BoostTransaction {
+  id        String   @id @default(cuid())
+  listingId String
+  userId    String
+  type      String
+  amount    Float
+  stripePaymentIntentId String?
+  createdAt DateTime @default(now())
+}
+
+model HallOfLegendsSubmission {
+  id        String   @id @default(cuid())
+  listingId String
+  userId    String
+  tier      String   @default("STANDARD")
+  status    String   @default("PENDING")
+  amount    Float
+  notes     String?
+  createdAt DateTime @default(now())
+  reviewedAt DateTime?
+}
+
+model Offer {
+  id        String   @id @default(cuid())
+  listingId String
+  buyerId   String
+  amount    Float
+  message   String?
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer   User    @relation("OffersMade", fields: [buyerId], references: [id])
+
+  @@index([listingId])
+  @@index([buyerId])
+}
+
+model AdSlot {
+  id          String   @id @default(cuid())
+  company     String
+  imageUrl    String
+  linkUrl     String
+  placement   String
+  isActive    Boolean  @default(true)
+  startDate   DateTime
+  endDate     DateTime
+  amount      Float
+  createdAt   DateTime @default(now())
+
+  @@index([placement])
+  @@index([isActive])
+}
+
+model Watchlist {
+  id          String   @id @default(cuid())
+  userId      String
+  listingId   String
+  priceAtSave Float
+  createdAt   DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@index([userId])
+}
+
+model WantToBuy {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+  gameSystem  String
+  faction     String?
+  maxBudget   Float?
+  isActive    Boolean  @default(true)
+  isBumped    Boolean  @default(false)
+  bumpExpiresAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([gameSystem])
+  @@index([isActive])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId])
+}
+
+model WtbMatch {
+  id        String   @id @default(cuid())
+  wtbId     String
+  listingId String
+  createdAt DateTime @default(now())
+
+  @@unique([wtbId, listingId])
+}
+
+model Conversation {
+  id             String    @id @default(cuid())
+  listingId      String?
+  participant1Id String
+  participant2Id String
+  lastMessage    String?
+  lastMessageAt  DateTime?
+  unread1        Int       @default(0)
+  unread2        Int       @default(0)
+  createdAt      DateTime  @default(now())
+
+  participant1 User      @relation("ConvP1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2 User      @relation("ConvP2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  listing      Listing?  @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  messages     Message[]
+
+  @@index([participant1Id])
+  @@index([participant2Id])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+}

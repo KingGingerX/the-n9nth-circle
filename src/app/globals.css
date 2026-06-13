@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-cinzel: 'Cinzel', serif;
+  --font-inter: 'Inter', sans-serif;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #07070f;
+    color: #f0e8d8;
+    font-family: var(--font-inter);
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: rgba(185, 28, 28, 0.4);
+    color: #f5d76e;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0e0e1f;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #5c0000;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #990000;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blood-700 hover:bg-blood-600 text-bone-100 font-semibold px-6 py-3 rounded-sm
+           transition-all duration-200 border border-blood-500 hover:border-blood-400
+           focus:outline-none focus:ring-2 focus:ring-blood-500 focus:ring-offset-2 focus:ring-offset-void-900;
+  }
+
+  .btn-secondary {
+    @apply bg-void-700 hover:bg-void-600 text-bone-300 font-semibold px-6 py-3 rounded-sm
+           transition-all duration-200 border border-void-600 hover:border-brass-700
+           focus:outline-none focus:ring-2 focus:ring-brass-700 focus:ring-offset-2 focus:ring-offset-void-900;
+  }
+
+  .btn-brass {
+    @apply bg-brass-700 hover:bg-brass-600 text-void-900 font-bold px-6 py-3 rounded-sm
+           transition-all duration-200 border border-brass-500 hover:border-brass-400
+           focus:outline-none focus:ring-2 focus:ring-brass-500 focus:ring-offset-2 focus:ring-offset-void-900;
+  }
+
+  .card {
+    @apply bg-void-800 border border-void-600 rounded-sm;
+  }
+
+  .card-hover {
+    @apply card hover:border-blood-800 hover:bg-void-700 transition-all duration-200 cursor-pointer;
+  }
+
+  .input {
+    @apply w-full bg-void-700 border border-void-600 text-bone-200 placeholder-bone-700
+           px-4 py-3 rounded-sm focus:outline-none focus:border-blood-600 focus:ring-1 focus:ring-blood-600
+           transition-colors duration-200;
+  }
+
+  .label {
+    @apply block text-bone-400 text-sm font-medium mb-1.5;
+  }
+
+  .section-title {
+    @apply font-display text-2xl font-bold text-bone-200 tracking-wider uppercase;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-sm text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .badge-blood {
+    @apply badge bg-blood-900 text-blood-300 border border-blood-800;
+  }
+
+  .badge-brass {
+    @apply badge bg-brass-900 text-brass-300 border border-brass-800;
+  }
+
+  .badge-void {
+    @apply badge bg-void-700 text-bone-400 border border-void-600;
+  }
+
+  .divider {
+    @apply border-t border-void-700 my-8;
+  }
+
+  .glow-red {
+    box-shadow: 0 0 20px rgba(185, 28, 28, 0.4);
+  }
+
+  .glow-brass {
+    box-shadow: 0 0 20px rgba(212, 160, 23, 0.3);
+  }
+
+  .text-gradient-blood {
+    background: linear-gradient(135deg, #dc2626, #7a0000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-brass {
+    background: linear-gradient(135deg, #f5d76e, #957000);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.rune-border {
+  border-image: linear-gradient(90deg, transparent, #7a0000, #d4a017, #7a0000, transparent) 1;
+}
+
+.hero-gradient {
+  background: radial-gradient(ellipse at center top, rgba(92, 0, 0, 0.3) 0%, transparent 60%),
+              radial-gradient(ellipse at center bottom, rgba(7, 7, 15, 1) 60%, transparent 100%),
+              linear-gradient(180deg, #030305 0%, #07070f 100%);
+}
+
+.listing-card-gradient {
+  background: linear-gradient(180deg, transparent 50%, rgba(3, 3, 5, 0.95) 100%);
+}
